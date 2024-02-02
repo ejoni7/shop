@@ -1,0 +1,85 @@
+{% extends 'product/master.html' %}
+{% load humanize %}
+{% block head %}{% endblock %}
+{% block title %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block body %}
+    <p>خود محصول</p>
+    <p>{{ product.name }}</p>
+    <p>{{ product.created }}</p>
+    <p>{{ product.category }}</p>
+    <p>{{ product.review }}</p>
+    <p>{{ product.information }}</p>
+    <p>{{ product.get_total_like }}</p>
+    <p>{{ product.p_view }}</p>
+    <a href="{% url 'product:product_like' product.id %}">like</a>
+    <br><br>
+    <h1>عکسای محصول</h1>
+    {% for img in product.product_images.all %}
+        <img src="{{ img.image.url }}" alt="عکهای {{ product.name }}">
+    {% endfor %}
+    <h1>محصولات مشابه</h1>
+    {% for related_product in related_products %}
+        {% for img in related_product.product_images.all|slice:":1" %}
+            <a href="{{ related_product.get_absolute_url }}">
+                <img src="{{ img.image.url }}" alt="محصولات مشابه{{ product.name }}">
+            </a>
+        {% endfor %}
+
+
+    {% endfor %}
+
+
+    <h1>تنوع انتخابی</h1>
+    {% for varrient in product.product_varrients.all %}
+        {% if varrient.id == select %}
+            <p>{{ varrient.name }}</p>
+            <p>{{ varrient.unit_price|intcomma }}</p>
+            <p>{{ varrient.discount }}</p>
+            <p>{{ varrient.quantity }}</p>
+            <p>{{ varrient.get_total_price|intcomma }}</p>
+            {% if  varrient.quantity > 0 %}
+                <p>تعداد موجود در انبار {{ varrient.quantity }}</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'product:add_item_to_card' varrient.id %}"> اضافه کردن به سبد خرید</a>
+                {% endif %}
+            {% else %}
+                <p>ناموجود</p>
+            {% endif %}
+        {% endif %}
+
+        <br><br>
+    {% endfor %}
+    <h1>انتخاب تنوع</h1>
+    <form method="POST">
+        {% csrf_token %}
+
+        {% for product_varrient in product.product_varrients.all %}
+            <input type="radio" name="select" value="{{ product_varrient.id }}"
+                   {% if product_varrient.id == select %}checked{% endif %} onchange="this.form.submit();">
+            <button>{{ product_varrient.name }}</button>
+            {#            test button works correctly#}
+            <br><br>
+        {% endfor %}
+
+    </form>
+    <h1>کامنتها</h1>
+    {% for comment in product.product_comments.all|slice:":6" %}
+        <p>{{ comment.user }}</p>
+        <p>{{ comment.text }}</p>
+        <br><br>
+    {% endfor %}
+    <H1>ایجاد کامنت</H1>
+    <form action="{% url 'product:send_comment' product.id %}" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">ثبت نظر</button>
+    </form>
+
+
+
+
+{% endblock %}
+{% block footer %}{% endblock %}
+
+

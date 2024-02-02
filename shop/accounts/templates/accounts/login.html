@@ -1,0 +1,18 @@
+{% extends "product/master.html"%}
+
+{% block title %}
+ورود | اهنگدان
+{% endblock %}
+{% block body %}
+<h2> فرم ورود </h2>
+<form method="POST">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type="submit">ورود</button>
+</form>
+<p> حساب کاربری ندارید؟ <a href="{% url 'accounts:register'%}">کلیک کنید</a>
+</p><p><a href="{% url 'accounts:forget_password' %}">رمز عبور خود را فراموش کرده اید؟</a></p>
+</p><p>شما با ثبت نام در سایت موافقت خود را با <a href="{% url 'accounts:rules' %}">قوانین و مقررات سایت</a> اعلام
+    میکنید</p>
+{% endblock%}
+

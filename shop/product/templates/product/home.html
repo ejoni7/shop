@@ -1,27 +1,34 @@
-{% extends 'home/master.html' %}
+{% extends 'product/master.html' %}
 {% load mathfilters %}
 {% block title %}خانه{% endblock %}
 {% block head %}{% endblock %}
 {% block navbar %}{% endblock %}
 {% block body %}
     {% for product in queries %}
-        {{ product.name }}
+        <p>{{ product.name }}</p>
+
+        {% for foo in product.product_images.all|slice:":1" %}
+            <a href="{{ product.get_absolute_url }}"><img src="{{ foo.image.url }}" alt="عکس {{ product.name }}"></a>
+        {% endfor %}
+
+
     {% endfor %}
     <div class="pagination">
-        <a {% if queries.has_previous %} href="{% url 'home' queries.previous_page_number %}" {% else %}
+        <a {% if queries.has_previous %} href="{% url 'product:home' queries.previous_page_number %}" {% else %}
                                          disabled {% endif %}>&laquo;</a>
 
         {% for num in page.page_range %}
             {% if page_num|sub:num > 2 %}<a disabled>...</a>
             {% elif page_num|sub:num|abs <= 2 %}
-                <a href="{% url 'home' num %}" {% if num == page_num %} class="active" {% endif %}>{{ num }}</a>
+                <a href="{% url 'product:home' num %}" {% if num == page_num %} class="active" {% endif %}>{{ num }}</a>
             {% else %}
                 <a disabled>...</a>
             {% endif %}
 
         {% endfor %}
 
-        <a {% if queries.has_next %} href="{% url 'home' queries.next_page_number %}" {% else %} disabled {% endif %}>&raquo;</a>
+        <a {% if queries.has_next %} href="{% url 'product:home' queries.next_page_number %}" {% else %}
+                                     disabled {% endif %}>&raquo;</a>
 
 
     </div>

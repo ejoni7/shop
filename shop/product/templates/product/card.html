@@ -1,0 +1,60 @@
+{% extends 'product/master.html' %}
+{% load mathfilters %}
+{% load humanize %}
+{% block title %}{% endblock %}
+{% block head %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block body %}
+    <div>
+        <h1>card </h1>
+        {% for card_item in user.user_items.all %}
+            <h1>values</h1>
+            <p> محصول انتخابی {{ card_item.varrient.product.name }}</p>
+            <p>{{ card_item.varrient.name }}</p>
+            <h1>uses</h1>
+            <a href="{% url 'product:mines_of_card' card_item.id %}">-</a>
+            <form action="{% url 'product:add_item_to_card' card_item.varrient.id %}" method="POST">
+                {% csrf_token %}
+                <input type="number" name="quantity" min="1" value=
+                        "{{ card_item.quantity }}" max="{{ card_item.varrient.quantity }}"
+                       required oninvalid="setCustomValidity(
+                        ' حداکثر مقدار مجاز = '{{ card_item.varrient.quantity }})">
+                <button type="submit">submit</button>
+            </form>
+            <a href="{% url 'product:add_to_card' card_item.id %}">+</a>
+            <br>
+            <p>{{ card_item.varrient.unit_price|intcomma}} مبلغ واحد</p>
+            <p> {{ card_item.varrient.discount }} درصد تخفیف</p>
+            <p>مبلغ واحد با کسر تخفیف {{ card_item.varrient.get_total_price|intcomma }}  </p>
+            <p>انتخابی تعداد {{ card_item.quantity }}</p>
+            <p>مجموع {{ card_item.quantity |mul:card_item.varrient.get_total_price|intcomma }}</p>
+            <a href="{% url 'product:delete_item' card_item.id %}">delete</a>
+            <hr>
+            <hr>
+        {% endfor %}
+        <p>جمع کل {{ sum|intcomma }}</p>
+        <p>کرایه {{ rent|intcomma }}</p>
+        <p>مبلغ قابل پرداخت {{ rent |add:sum |intcomma}}</p>
+    </div>
+    <div>
+        <h1>مشخصات</h1>
+        <p>{{ user.username }} به نام </p>
+        <p>{{ user.phone }} شماره تماس </p>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" value="{{ user.address }}" name="address">
+            <button type="submit">تایید</button>
+        </form>
+
+    </div>
+    <hr>
+    <hr>
+    <div>
+        <form method="POST" action="{% url 'product:payment' %}">
+            {% csrf_token %}
+            <button type="submit"> پرداخت</button>
+        </form>
+    </div>
+
+{% endblock %}
+{% block footer %}{% endblock %}
