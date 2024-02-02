@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    {% block head %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+{% block navbar %}{% endblock %}
+{% block body %}{% endblock %}
+{% block footer %}{% endblock %}
+<h1>handle messages!</h1>
+{% include 'product/messages.html' %}
+
+{% if user.is_authenticated %}
+            <a href="{% url 'accounts:logout_' %}">خروج</a><br><br>
+            <a href="{% url 'accounts:profile'  %}">پروفایل</a>
+        {% else %}
+            <a href="{% url 'accounts:login' %}">لاگین</a>
+            <a href="{% url 'accounts:register' %}">ثبت نام</a>
+
+        {% endif %} <br><br>
+    {% block navbar %}
+        {% endblock %}
+    {% block body %}{% endblock %}
+    {% block footer %}{% endblock %}
+</body>
+</html>
