@@ -35,10 +35,12 @@ def product(request, slug, id):
     else:
         product.review += 1
         product.save()
+
     return render(request, 'product/product.html',
                   {'product': product, 'related_products': related_products, 'form': form, 'select': select, })
 
 
+#                                 needs javascript to just call the function with out  out put
 @login_required(login_url='accounts:login')
 def send_comment(request):
     refer = request.META.get('HTTP_REFERER')
@@ -50,12 +52,14 @@ def send_comment(request):
             return redirect(refer)
 
 
+#                                 needs javascript to just call the function and send message with json
 @login_required(login_url='accounts:login')
-def product_like(request, id):  # handle this jquery or javascript
+def product_like(request, id):
     refer = request.META.get('HTTP_REFERER')
     product = get_object_or_404(Product, id=id)
     if request.user not in product.like.all():
         product.like.add(request.user)
+    message = 'user liked'
     return redirect(refer)
 
 
@@ -68,6 +72,7 @@ def card(request):
         user = request.user
         user.address = data['address']
         user.save()
+        messages.success(request, 'ادرس با موفقیت ویرایش شد')
         return redirect('product:card')
     else:
         check_quantity(request.user.id)
@@ -94,6 +99,8 @@ def sum(id):
     return sum
 
 
+#                                 needs javascript to just call the function and return quantity at 115,118
+#                                 and maybe remove succes message at 117
 @login_required(login_url='accounts:login')
 def add_item_to_card(request, id):
     refer = request.META.get('HTTP_REFERER')
@@ -105,11 +112,12 @@ def add_item_to_card(request, id):
                 item.quantity = quant
                 item.save()
                 return redirect(refer)
-    Item.objects.create(quantity=quant, varrient_id=id, user_id=request.user.id)
+    item = Item.objects.create(quantity=quant, varrient_id=id, user_id=request.user.id)
     messages.success(request, 'ایتم اضافه شد')
     return redirect(refer)
 
 
+#                                 needs javascript to just call the function with out  out put
 @login_required(login_url='accounts:login')
 def delete_item(request, id):
     refer = request.META.get('HTTP_REFERER')
@@ -118,57 +126,73 @@ def delete_item(request, id):
     return redirect(refer)
 
 
+#                                 needs javascript to just call the function and return message
+#                                 if item exist return the item.quantity
+#                                        else return None
 @login_required(login_url='accounts:login')
 def mines_of_card(request, id):
     refer = request.META.get('HTTP_REFERER')
     item = get_object_or_404(Item, id=id)
     item.quantity -= 1
     item.save()
+    message = item.quantity
     if item.quantity <= 0:
         item.delete()
+        message = 'None'
     return redirect(refer)
 
 
+#                                 needs javascript to just call the function and return message
+
+@login_required(login_url='accounts:login')
 def add_to_card(request, id):
     refer = request.META.get('HTTP_REFERER')
     item = get_object_or_404(Item, id=id)
     if item.quantity < item.varrient.quantity:
         item.quantity += 1
         item.save()
+    message = item.quantity
     return redirect(refer)
 
 
-def payment(request):
-    return HttpResponse('im in peyment')
-
-
 def after_buy(user_id, payment):
-    user = User.objects.get(id=id)
-    factor = Factor.object.Create(user_id=user_id, payment=payment)
-    sum_factor_price = 0
-    sum_unit_price = 0
-    sum_total_price = 0
-    sum_total_profit = 0
-    for item in user.user_items.all():
-        var = item.varrient
-        factory_price = var.product.factory_pric
-        unit_price = var.unit_price
-        total_price = var.get_total_price()
-        unit_profit = total_price - factory_price
-        quantity = item.quantity
-        total_profit = quantity * unit_profit
-        sum_factor_price += factory_price
-        sum_unit_price += unit_price
-        sum_total_price += total_price
-        sum_total_profit += total_profit
-        FactorItems.objects.create(factor_id=factor.id,
-                                   item_var_id=var.id,
-                                   factory_price=factory_price,
-                                   unit_price=unit_price,
-                                   total_price=total_price,
-                                   discount=var.discount,
-                                   quantity=quantity,
-                                   unit_profit=unit_profit,
-                                   total_profit=total_profit, )
-    for item in user.user_items.all():
-        item.delete()
+    user = User.objects.get(id=user_id)
+    if user.user_items.all():
+
+        factor = Factor.objects.create(user_id=user_id, payment=payment)
+        factor.transfer = TransferRent.objects.latest('rent').rent
+        for item in user.user_items.all():
+            var = item.varrient
+            factory_price = var.product.factory_price
+            unit_price = var.unit_price
+            total_price = var.get_total_price()
+            unit_profit = total_price - factory_price
+            quantity = item.quantity
+            total_profit = quantity * unit_profit
+            factor.sum_factory_price += factory_price * quantity
+            factor.sum_unit_price += unit_price * quantity
+            factor.sum_total_price += total_price * quantity
+            factor.sum_total_profit += total_profit
+            factor.save()
+            FactorItems.objects.create(factor_id=factor.id,
+                                       item_name=f"  محصول {item.varrient.product.name} تنوع {item.varrient.name}  کد تنوع   {item.varrient.id}   ",
+                                       factory_price=factory_price,
+                                       unit_price=unit_price,
+                                       total_price=total_price,
+                                       discount=var.discount,
+                                       quantity=quantity,
+                                       unit_profit=unit_profit,
+                                       total_profit=total_profit, )
+        for item in user.user_items.all():
+            item.varrient.quantity -= item.quantity
+            item.varrient.save()
+            item.delete()
+
+
+@login_required(login_url='accounts:login')
+def pay(request):
+    if request.method=='POST':
+        payment_ = 15060000
+        user_id = request.user.id
+        after_buy(user_id, payment_)
+        return redirect('product:card')

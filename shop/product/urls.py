@@ -13,5 +13,5 @@ urlpatterns = [
     path('mines_of_card/<int:id>/', views.mines_of_card, name='mines_of_card'),
     path('delete_item/<int:id>/', views.delete_item, name='delete_item'),
     path('card/', views.card, name='card'),
-    path('payment/', views.payment, name='payment'),
+    path('pay/', views.pay, name='pay'),
 ]

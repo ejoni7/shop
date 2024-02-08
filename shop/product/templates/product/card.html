@@ -8,7 +8,7 @@
     <div>
         <h1>card </h1>
         {% for card_item in user.user_items.all %}
-            <h1>values</h1>
+            <h1> item  and values </h1>
             <p> محصول انتخابی {{ card_item.varrient.product.name }}</p>
             <p>{{ card_item.varrient.name }}</p>
             <h1>uses</h1>
@@ -50,7 +50,7 @@
     <hr>
     <hr>
     <div>
-        <form method="POST" action="{% url 'product:payment' %}">
+        <form method="POST" action="{% url 'product:pay' %}">
             {% csrf_token %}
             <button type="submit"> پرداخت</button>
         </form>

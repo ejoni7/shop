@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Product, ProductImage, Varrient, Comment, Category, Factor, FactorItems, Item,TransferRent
+from .models import Product, ProductImage, Varrient, Comment, Category, Factor, FactorItems, Item, TransferRent
+
 
 
 class ProductImageInline(admin.TabularInline):
@@ -47,16 +48,20 @@ class VarrientAdmin(admin.ModelAdmin):
 
 class FactorItemsInline(admin.TabularInline):
     model = FactorItems
-    readonly_fields = ('factor', 'item_var', 'factory_price', 'unit_price',
+    readonly_fields = ('factor', 'item_name', 'factory_price', 'unit_price',
                        'total_price', 'discount', 'quantity', 'unit_profit', 'total_profit',)
 
 
 @admin.register(Factor)
 class FactorAdmin(admin.ModelAdmin):
     model = Factor
-    readonly_fields = ( 'created', 'user', 'payment', 'sum_factory_price', 'sum_unit_price',
-                       'sum_total_price', 'sum_total_profit',)
+    readonly_fields = (
+        'created', 'user', 'payment', 'sum_total_price', 'transfer', 'sum_factory_price', 'sum_unit_price',
+        'sum_total_profit',)
     inlines = [FactorItemsInline, ]
+    change_list_template = 'product/change_x.html'
+
+
 
 
 class ItemInline(admin.TabularInline):
@@ -70,8 +75,6 @@ class ItemAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'quantity', 'varrient',)
 
 
-
 @admin.register(TransferRent)
 class TransferRentAdmin(admin.ModelAdmin):
     model = TransferRent
-
